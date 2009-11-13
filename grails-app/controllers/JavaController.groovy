@@ -3,47 +3,55 @@ import org.nazt.lexto.*
 import groovy.util.*
 import java.*
 import groovy.util.*
-/*/	System.setProperty( "file.encoding", "UTF-8" );*/
+
 class JavaController {
  
 	def myTypeList,myIndexList=[]
     def index = { 
-	 System.out.println("Encoding: " + System.getProperty("file.encoding"));
-     System.out.println("Charset: " + java.nio.charset.Charset.defaultCharset());
-	def myString=[]
-	def lexdict=new File("lexitron.txt")
-	LongLexTo tokenizer=new LongLexTo("SELFED DICT")
-	lexdict.eachLine{ tokenizer.addDict(it.trim()) }
-	def news=new File("news.txt")
-	news.eachLine{
-	tokenizer.wordInstance(it.trim())
-		myTypeList = tokenizer.getTypeList()
-		myIndexList=tokenizer.getIndexList()
-		myString = it
-
-
-		def indexer=0
-		def longlexnews=""
-		myIndexList.eachWithIndex{ num, idx ->
-			//def type=myTypeList[idx]
-			longlexnews+= myString[indexer..num-1] + "|" 
-			indexer=num
-		}
-	new News(news:myString,lexnews:longlexnews,corrected:false).save()
-/*		println result*/
-		render longlexnews + "nat2"
+		//def lexdict=new File("lexitron.txt")
+		def lexdict= Vocab.findAll('from Vocab')
+		LongLexTo tokenizer=new LongLexTo("SELFED DICT")
+		lexdict.each{ tokenizer.addDict(it.vocab.trim()) }
+		def news=new File("newstext.txt")
+		news.eachLine{ line ->
+			tokenizer.wordInstance(line.trim())
+			myTypeList = tokenizer.getTypeList()
+			myIndexList=tokenizer.getIndexList()
+		
+			def indexer=0
+			def longlexnews=""
+			myIndexList.eachWithIndex{ val, idx ->
+				longlexnews+= line[indexer..val-1] + "|" 
+				indexer=val
+			}
+			//def i=1
+			//def j=2
+			//def k=3
+			//def l=4
+			new News(news:line,lexnews:longlexnews,corrected:false).save()
+			//new Datagraph(countfalse:i,counttrue:j,numberofnews:l,percent:k).save()
+			render longlexnews + "nat2<br>\n"
 		
 		
 				
-	}
+		}
 	
-	println System.getProperty("user.dir");
+
 
 	println myIndexList
 	println myTypeList
- 
+	redirect(url:'http://overdrive:9000/ATN/news/list')
 
-	 System.out.println("Encoding: " + System.getProperty("file.encoding"));
-    System.out.println("Charset: " + java.nio.charset.Charset.defaultCharset());
 	 } 
 }
+/*/	
+
+	println System.getProperty("user.dir");
+	
+	System.setProperty( "file.encoding", "UTF-8" );*/
+/*System.out.println("Encoding: " + System.getProperty("file.encoding"));
+System.out.println("Charset: " + java.nio.charset.Charset.defaultCharset());
+
+ System.out.println("Encoding: " + System.getProperty("file.encoding"));
+System.out.println("Charset: " + java.nio.charset.Charset.defaultCharset());
+*/
